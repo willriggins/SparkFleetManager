@@ -1,0 +1,25 @@
+<html>
+<head>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <title>Fleet Manager</title>
+</head>
+<body>
+Welcome, {{username}}.
+<form action="/logout" method="post">
+    <button type="submit">Log out</button>
+</form>
+<form action="/add-aircraft" method="post">
+    <input type="text" placeholder="Model Name" name="model" />
+    <input type="text" placeholder="Manufacturer" name="manufacturer" />
+    <input type="text" placeholder="Service Branch" name="serviceBranch" />
+    <input type="text" placeholder="Role" name="role" />
+    <input type="text" placeholder="Cost (USD)" name="cost" />
+    <!--<input />-->
+    <button type="submit">Add</button>
+</form>
+
+<h2>Your fleet:</h2>
+{{#fleet}}
+
+</body>
+</html>
