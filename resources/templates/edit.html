@@ -1,0 +1,23 @@
+<html>
+<head>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <title>Entry Editor</title>
+
+</head>
+<body>
+<div class="entry">
+    <p style="text-align: center;"><b>{{model}}</b></p>
+    Manufacturer: {{manufacturer}}<br>
+    Service Branch: {{serviceBranch}}<br>
+    Role: {{role}}<br>
+    Unit Cost: ${{unitCost}}<br>
+</div>
+<form action="edit-aircraft" method="post">
+<input type="text" placeholder="New Manufacturer" name="newman" />
+<input type="text" placeholder="New Cost" name="newCost" />
+    <input type="hidden" name="eid" value="{{id}}"/>
+    <button type="submit">Edit</button>
+        </form>
+</body>
+</html>
+

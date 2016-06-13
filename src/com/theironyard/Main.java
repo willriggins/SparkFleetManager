@@ -26,7 +26,11 @@ public class Main {
                         return new ModelAndView(m, "home.html");
                     }
                     else {
-                        System.out.println("placeholder is here");
+                        int id = 1;
+                        for (Airplane plane : user.fleet) {
+                            plane.id = id;
+                            id++;
+                        }
                     }
                     m.put("username", user.username);
                     m.put("fleet", user.fleet);
@@ -80,16 +84,73 @@ public class Main {
                     String manufacturer = request.queryParams("manufacturer");
                     String serviceBranch = request.queryParams("serviceBranch");
                     String role = request.queryParams("role");
-//                    String inService = request.queryParams("inService");
-                    int cost = Integer.valueOf(request.queryParams("cost"));
+                    String unitCost = (request.queryParams("cost"));
 
-                    Airplane airplane = new Airplane(model, manufacturer, serviceBranch, role, true, cost);
+
+                    Airplane airplane = new Airplane(model, manufacturer, serviceBranch, role, unitCost);
                     user.fleet.add(airplane);
 
                     response.redirect("/");
                     return "";
+                }
+        );
+        Spark.post(
+                "/delete-aircraft",
+                (request, response) -> {
+                    Session session = request.session();
+                    String username = session.attribute("username");
+
+                    User user = users.get(username);
+
+                    int id = Integer.valueOf(request.queryParams("id"));
+                    if (id <= 0 || id - 1 > user.fleet.size()) {
+                        throw new Exception("Invalid ID");
+                    }
+                    user.fleet.remove(id - 1);
+
+                    response.redirect("/");
+                    return "";
+                }
+        );
+        Spark.get(
+                "/edit",
+                (request, response) -> {
+                    int id = Integer.valueOf(request.queryParams("eid"));
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    User user = users.get(username);
+
+                    Airplane airplane = user.fleet.get(id - 1);
+
+                    return new ModelAndView(airplane, "edit.html");
+
+                },
+                new MustacheTemplateEngine()
+        );
+        Spark.post(
+                "edit-aircraft",
+                (request, response) -> {
+                    int id = Integer.valueOf(request.queryParams("eid"));
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    User user = users.get(username);
 
 
+                    String newManufacturer = request.queryParams("newman");
+                    String newCost = request.queryParams("newCost");
+
+                    Airplane airplane = user.fleet.get(id-1);
+
+                    if (newManufacturer != null) {
+                        airplane.manufacturer = newManufacturer;
+                    }
+                    if (newCost != null) {
+                        airplane.unitCost = newCost;
+                    }
+
+
+                    response.redirect("/");
+                    return "";
                 }
         );
     }

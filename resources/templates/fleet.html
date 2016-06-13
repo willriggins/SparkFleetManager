@@ -14,12 +14,29 @@ Welcome, {{username}}.
     <input type="text" placeholder="Service Branch" name="serviceBranch" />
     <input type="text" placeholder="Role" name="role" />
     <input type="text" placeholder="Cost (USD)" name="cost" />
-    <!--<input />-->
     <button type="submit">Add</button>
 </form>
 
 <h2>Your fleet:</h2>
+<ol>
 {{#fleet}}
+    <div class="entry">
+        <p style="text-align: center;"><b>{{model}}</b></p>
+        Manufacturer: {{manufacturer}}<br>
+        Service Branch: {{serviceBranch}}<br>
+        Role: {{role}}<br>
+        Unit Cost: ${{unitCost}}<br>
+        <form action="/delete-aircraft" method="post" style="display: inline-block;">
+            <input type="hidden" name="id" value="{{id}}"/>
+            <button type="submit">Remove</button>
+        </form>
+        <form action="/edit" method="get" style="display: inline-block;">
+            <input type="hidden" name="eid" value="{{id}}" />
+            <button type="submit">Edit</button>
+        </form>
+    </div>
+    {{/fleet}}
+</ol>
 
 </body>
 </html>

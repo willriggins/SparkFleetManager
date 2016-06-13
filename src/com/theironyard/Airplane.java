@@ -8,15 +8,16 @@ public class Airplane {
     String manufacturer;
     String serviceBranch;
     String role;
-    boolean inService;
-    int cost;
+    String unitCost;
+    int id;
 
-    public Airplane(String model, String manufacturer, String serviceBranch, String role, boolean inService, int cost) {
+
+    public Airplane(String model, String manufacturer, String serviceBranch, String role, String unitCost) {
         this.model = model;
         this.manufacturer = manufacturer;
         this.serviceBranch = serviceBranch;
         this.role = role;
-        this.inService = inService;
-        this.cost = cost;
+        this.unitCost = unitCost;
+
     }
 }
