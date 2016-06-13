@@ -13,11 +13,13 @@
     Unit Cost: ${{unitCost}}<br>
 </div>
 <form action="edit-aircraft" method="post">
-<input type="text" placeholder="New Manufacturer" name="newman" />
-<input type="text" placeholder="New Cost" name="newCost" />
+    <input type="text" placeholder="New Manufacturer" name="newManufacturer" />
+    <input type="text" placeholder="New Role" name="newRole" />
+    <input type="text" placeholder="New Service Branch" name="newServiceBranch" />
+    <input type="text" placeholder="New Cost" name="newCost" />
     <input type="hidden" name="eid" value="{{id}}"/>
     <button type="submit">Edit</button>
-        </form>
+</form>
 </body>
 </html>
 

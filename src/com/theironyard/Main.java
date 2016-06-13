@@ -135,19 +135,25 @@ public class Main {
                     String username = session.attribute("username");
                     User user = users.get(username);
 
-
-                    String newManufacturer = request.queryParams("newman");
+                    String newManufacturer = request.queryParams("newManufacturer");
+                    String newRole = request.queryParams("newRole");
+                    String newServiceBranch = request.queryParams("newServiceBranch");
                     String newCost = request.queryParams("newCost");
 
                     Airplane airplane = user.fleet.get(id-1);
 
-                    if (newManufacturer != null) {
+                    if (!newManufacturer.equals("")) {
                         airplane.manufacturer = newManufacturer;
                     }
-                    if (newCost != null) {
+                    if (!newRole.equals("")) {
+                        airplane.role = newRole;
+                    }
+                    if (!newServiceBranch.equals("")) {
+                        airplane.serviceBranch = newServiceBranch;
+                    }
+                    if (!newCost.equals("")) {
                         airplane.unitCost = newCost;
                     }
-
 
                     response.redirect("/");
                     return "";
