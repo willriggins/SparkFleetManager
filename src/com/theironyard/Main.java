@@ -43,8 +43,10 @@ public class Main {
                 (request, response) -> {
                     String username = request.queryParams("username");
                     String password = request.queryParams("password");
-                    if (username == null || password == null) {
+                    if (username.equals("") || password.equals("")) {
+                        response.redirect("/");
                         throw new Exception("Username and password required.");
+
                     }
                     User user = users.get(username);
                     if (user == null) {

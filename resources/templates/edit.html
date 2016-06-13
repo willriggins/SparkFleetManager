@@ -5,21 +5,27 @@
 
 </head>
 <body>
-<div class="entry">
+<div id="header">
+    <h1>Fleet Manager</h1>
+</div>
+<div id="editpage">
+<div class="entryedit">
     <p style="text-align: center;"><b>{{model}}</b></p>
     Manufacturer: {{manufacturer}}<br>
     Service Branch: {{serviceBranch}}<br>
     Role: {{role}}<br>
     Unit Cost: ${{unitCost}}<br>
 </div>
+    <br>
 <form action="edit-aircraft" method="post">
     <input type="text" placeholder="New Manufacturer" name="newManufacturer" />
-    <input type="text" placeholder="New Role" name="newRole" />
     <input type="text" placeholder="New Service Branch" name="newServiceBranch" />
+    <input type="text" placeholder="New Role" name="newRole" />
     <input type="text" placeholder="New Cost" name="newCost" />
     <input type="hidden" name="eid" value="{{id}}"/>
     <button type="submit">Edit</button>
 </form>
+    </div>
 </body>
 </html>
 

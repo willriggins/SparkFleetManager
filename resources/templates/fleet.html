@@ -4,20 +4,26 @@
     <title>Fleet Manager</title>
 </head>
 <body>
-Welcome, {{username}}.
-<form action="/logout" method="post">
-    <button type="submit">Log out</button>
-</form>
-<form action="/add-aircraft" method="post">
-    <input type="text" placeholder="Model Name" name="model" />
-    <input type="text" placeholder="Manufacturer" name="manufacturer" />
-    <input type="text" placeholder="Service Branch" name="serviceBranch" />
-    <input type="text" placeholder="Role" name="role" />
-    <input type="text" placeholder="Cost (USD)" name="cost" />
-    <button type="submit">Add</button>
-</form>
-
-<h2>Your fleet:</h2>
+<div id="header">
+    <h1>Fleet Manager</h1>
+</div>
+<div id="welcome">Welcome, <b>{{username}}</b>.
+    <form action="/logout" method="post" style="display: inline-block;">
+        <button type="submit">Log out</button>
+    </form>
+</div>
+<div id="add">
+    <form action="/add-aircraft" method="post">
+        <input type="text" placeholder="Model Name" name="model" />
+        <input type="text" placeholder="Manufacturer" name="manufacturer" />
+        <input type="text" placeholder="Service Branch" name="serviceBranch" />
+        <input type="text" placeholder="Role" name="role" />
+        <input type="text" placeholder="Cost (USD)" name="cost" />
+        <br><button type="submit">Add</button>
+    </form>
+</div>
+<div id="rest">
+<h2>Your Fleet:</h2>
 <ol>
 {{#fleet}}
     <div class="entry">
@@ -37,6 +43,6 @@ Welcome, {{username}}.
     </div>
     {{/fleet}}
 </ol>
-
+</div>
 </body>
 </html>
