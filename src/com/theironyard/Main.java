@@ -1,17 +1,49 @@
 package com.theironyard;
 
+import org.h2.tools.Server;
 import spark.ModelAndView;
 import spark.Session;
 import spark.Spark;
 import spark.template.mustache.MustacheTemplateEngine;
 
+import java.sql.*;
 import java.util.HashMap;
 
 public class Main {
 
     static HashMap<String, User> users = new HashMap<>();
 
-    public static void main(String[] args) {
+    public static User selectUser(Connection conn, String name) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username = ?");
+        stmt.setString(1, name);
+        ResultSet results = stmt.executeQuery();
+        if (results.next()) {
+            int id = results.getInt("id");
+            String password = results.getString("password");
+            return new User(id, name, password);
+        }
+        return null;
+    }
+
+    public static void insertUser(Connection conn, String name, String password) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO users VALUES (NULL, ?, ?)");
+        stmt.setString(1, name);
+        stmt.setString(2, password);
+        stmt.execute();
+    }
+
+    public static void createTables(Connection conn) throws SQLException {
+        Statement stmt = conn.createStatement();
+        stmt.execute("CREATE TABLE IF NOT EXISTS fleet (id IDENTITY, model VARCHAR, manufacturer VARCHAR, serviceBranch VARCHAR, role VARCHAR, unitCost VARCHAR)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS users (id IDENTITY, username VARCHAR, password VARCHAR)");
+    }
+
+    public static void main(String[] args) throws SQLException {
+        Server.createWebServer().start();
+        Connection conn = DriverManager.getConnection("jdbc:h2:./main");
+        createTables(conn);
+
+
         Spark.staticFileLocation("public");
         Spark.init();
         Spark.get(
