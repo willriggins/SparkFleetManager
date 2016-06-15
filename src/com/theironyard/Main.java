@@ -13,6 +13,34 @@ public class Main {
 
     static HashMap<String, User> users = new HashMap<>();
 
+
+
+    public static Airplane selectEntry(Connection conn, int id) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM fleet INNER JOIN users ON fleet.user_id = users.id WHERE users.id = ?");
+        stmt.setInt(1, id);
+        ResultSet results = stmt.executeQuery();
+        if (results.next()) {
+            String model = results.getString("fleet.model");
+            String manufacturer = results.getString("fleet.manufacturer");
+            String serviceBranch = results.getString("fleet.service_branch");
+            String role = results.getString("fleet.role");
+            String unitCost = results.getString("fleet.unit_cost");
+            return new Airplane(model, manufacturer, serviceBranch, role, unitCost);
+        }
+        return null;
+    }
+
+    public static void insertEntry(Connection conn, String model, String manufacturer, String serviceBranch, String role, String unitCost, int userId) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO fleet VALUES (NULL, ?, ?, ?, ?, ?, ?)");
+        stmt.setString(1, model);
+        stmt.setString(2, manufacturer);
+        stmt.setString(3, serviceBranch);
+        stmt.setString(4, role);
+        stmt.setString(5, unitCost);
+        stmt.setInt(6, userId);
+        stmt.execute();
+    }
+
     public static User selectUser(Connection conn, String name) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username = ?");
         stmt.setString(1, name);
@@ -34,7 +62,7 @@ public class Main {
 
     public static void createTables(Connection conn) throws SQLException {
         Statement stmt = conn.createStatement();
-        stmt.execute("CREATE TABLE IF NOT EXISTS fleet (id IDENTITY, model VARCHAR, manufacturer VARCHAR, serviceBranch VARCHAR, role VARCHAR, unitCost VARCHAR)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS fleet (id IDENTITY, model VARCHAR, manufacturer VARCHAR, service_branch VARCHAR, role VARCHAR, unit_cost VARCHAR, user_id INT)");
         stmt.execute("CREATE TABLE IF NOT EXISTS users (id IDENTITY, username VARCHAR, password VARCHAR)");
     }
 

@@ -29,4 +29,17 @@ public class MainTest {
 
     }
 
+    @Test
+    public void testEntry() throws SQLException {
+        Connection conn = startConnection();
+        Main.insertUser(conn, "Alice", "123");
+        User user = Main.selectUser(conn, "Alice");
+        Main.insertEntry(conn, "F/A-18", "McDonnell Douglas", "US Navy", "Fighter/Attack", "57,000,000", 1);
+        Airplane ap = Main.selectEntry(conn, 1);
+        conn.close();
+        assertTrue(ap != null);
+        assertTrue(ap.serviceBranch.equals("US Navy"));
+
+    }
+
 }
