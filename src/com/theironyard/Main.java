@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class Main {
 
-    static HashMap<String, User> users = new HashMap<>();
+//    static HashMap<String, User> users = new HashMap<>();
 
     public static void deleteEntry(Connection conn, int id) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("DELETE FROM fleet WHERE id = ?");
@@ -21,7 +21,7 @@ public class Main {
     }
 
     public static void updateEntry(Connection conn, String model, String manufacturer, String serviceBranch, String role, String unitCost, int id) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("UPDATE fleet SET (model, manufacturer, service_branch, role, unit_cost) = (?, ?, ?, ?, ?) WHERE id = ?");
+        PreparedStatement stmt = conn.prepareStatement("UPDATE fleet SET model = ?, manufacturer = ?, service_branch = ?, role = ?, unit_cost = ? WHERE id = ?");
         stmt.setString(1, model);
         stmt.setString(2, manufacturer);
         stmt.setString(3, serviceBranch);
@@ -113,22 +113,16 @@ public class Main {
                 (request, response) -> {
                     Session session = request.session();
                     String username = session.attribute("username");
-                    User user = users.get(username);
                     HashMap m = new HashMap();
 
                     if (username == null) {
                         return new ModelAndView(m, "home.html");
                     }
                     else {
-                        int id = 1;
-                        for (Airplane plane : user.fleet) {
-                            plane.id = id;
-                            id++;
-                        }
+                        m.put("fleet", selectEntries(conn));
+                        m.put("username", username);
+                        return new ModelAndView(m, "fleet.html");
                     }
-                    m.put("username", user.username);
-                    m.put("fleet", user.fleet);
-                    return new ModelAndView(m, "fleet.html");
                 },
                 new MustacheTemplateEngine()
         );
@@ -142,10 +136,10 @@ public class Main {
                         throw new Exception("Username and password required.");
 
                     }
-                    User user = users.get(username);
+                    User user = selectUser(conn, username);
                     if (user == null) {
-                        user = new User(username, password);
-                        users.put(username, user);
+//                        user = new User(username, password);
+                        insertUser(conn, username, password);
                     }
                     else if (!password.equals(user.password)) {
                         throw new Exception("Incorrect password.");
@@ -174,7 +168,7 @@ public class Main {
                     Session session = request.session();
                     String username = session.attribute("username");
 
-                    User user = users.get(username);
+                    User user = selectUser(conn, username);
 
                     String model = request.queryParams("model");
                     String manufacturer = request.queryParams("manufacturer");
@@ -183,8 +177,9 @@ public class Main {
                     String unitCost = (request.queryParams("cost"));
 
 
-                    Airplane airplane = new Airplane(model, manufacturer, serviceBranch, role, unitCost);
-                    user.fleet.add(airplane);
+//                    Airplane airplane = new Airplane(model, manufacturer, serviceBranch, role, unitCost);
+//                    user.fleet.add(airplane);
+                    insertEntry(conn, model, manufacturer, serviceBranch, role, unitCost, user.id);
 
                     response.redirect("/");
                     return "";
@@ -196,13 +191,11 @@ public class Main {
                     Session session = request.session();
                     String username = session.attribute("username");
 
-                    User user = users.get(username);
+                    User user = selectUser(conn, username);
 
                     int id = Integer.valueOf(request.queryParams("id"));
-                    if (id <= 0 || id - 1 > user.fleet.size()) {
-                        throw new Exception("Invalid ID");
-                    }
-                    user.fleet.remove(id - 1);
+
+                    deleteEntry(conn, id);
 
                     response.redirect("/");
                     return "";
@@ -214,9 +207,10 @@ public class Main {
                     int id = Integer.valueOf(request.queryParams("eid"));
                     Session session = request.session();
                     String username = session.attribute("username");
-                    User user = users.get(username);
 
-                    Airplane airplane = user.fleet.get(id - 1);
+                    User user = selectUser(conn, username);
+
+                    Airplane airplane = selectEntry(conn, id);
 
                     return new ModelAndView(airplane, "edit.html");
 
@@ -229,28 +223,34 @@ public class Main {
                     int id = Integer.valueOf(request.queryParams("eid"));
                     Session session = request.session();
                     String username = session.attribute("username");
-                    User user = users.get(username);
 
+                    User user = selectUser(conn, username);
+                    selectEntry(conn, user.id);
+
+
+                    String newModel = request.queryParams("newModel");
                     String newManufacturer = request.queryParams("newManufacturer");
                     String newRole = request.queryParams("newRole");
                     String newServiceBranch = request.queryParams("newServiceBranch");
                     String newCost = request.queryParams("newCost");
 
-                    Airplane airplane = user.fleet.get(id-1);
 
-                    if (!newManufacturer.equals("")) {
-                        airplane.manufacturer = newManufacturer;
-                    }
-                    if (!newRole.equals("")) {
-                        airplane.role = newRole;
-                    }
-                    if (!newServiceBranch.equals("")) {
-                        airplane.serviceBranch = newServiceBranch;
-                    }
-                    if (!newCost.equals("")) {
-                        airplane.unitCost = newCost;
-                    }
 
+//                    if (!newManufacturer.equals("")) {
+//                        airplane.manufacturer = newManufacturer;
+//                    }
+//                    if (!newRole.equals("")) {
+//                        airplane.role = newRole;
+//                    }
+//                    if (!newServiceBranch.equals("")) {
+//                        airplane.serviceBranch = newServiceBranch;
+//                    }
+//                    if (!newCost.equals("")) {
+//                        airplane.unitCost = newCost;
+//                    }
+
+                    updateEntry(conn, newModel, newManufacturer, newRole, newServiceBranch, newCost, id);
+//
                     response.redirect("/");
                     return "";
                 }
