@@ -7,13 +7,47 @@ import spark.Spark;
 import spark.template.mustache.MustacheTemplateEngine;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Main {
 
     static HashMap<String, User> users = new HashMap<>();
 
+    public static void deleteEntry(Connection conn, int id) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("DELETE FROM fleet WHERE id = ?");
+        stmt.setInt(1, id);
+        stmt.execute();
+    }
 
+    public static void updateEntry(Connection conn, String model, String manufacturer, String serviceBranch, String role, String unitCost, int id) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("UPDATE fleet SET (model, manufacturer, service_branch, role, unit_cost) = (?, ?, ?, ?, ?) WHERE id = ?");
+        stmt.setString(1, model);
+        stmt.setString(2, manufacturer);
+        stmt.setString(3, serviceBranch);
+        stmt.setString(4, role);
+        stmt.setString(5, unitCost);
+        stmt.setInt(6, id);
+        stmt.execute();
+    }
+
+    public static ArrayList<Airplane> selectEntries(Connection conn) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM fleet INNER JOIN users ON fleet.user_id = users.id");
+        ResultSet results = stmt.executeQuery();
+        ArrayList<Airplane> fleet = new ArrayList<>();
+        while (results.next()) {
+            int id = results.getInt("id");
+            String model = results.getString("fleet.model");
+            String manufacturer = results.getString("fleet.manufacturer");
+            String serviceBranch = results.getString("fleet.service_branch");
+            String role = results.getString("fleet.role");
+            String unitCost = results.getString("fleet.unit_cost");
+            Airplane ap = new Airplane(id, model,  manufacturer, serviceBranch, role, unitCost);
+            fleet.add(ap);
+        }
+        return fleet;
+
+    }
 
     public static Airplane selectEntry(Connection conn, int id) throws SQLException {
         PreparedStatement stmt = conn.prepareStatement("SELECT * FROM fleet INNER JOIN users ON fleet.user_id = users.id WHERE users.id = ?");
