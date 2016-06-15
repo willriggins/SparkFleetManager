@@ -9,6 +9,7 @@
     <h1>Fleet Manager</h1>
 </div>
 <div id="editpage">
+{{#airplane}}
 <div class="entryedit">
     <p style="text-align: center;"><b>{{model}}</b></p>
     Manufacturer: {{manufacturer}}<br>
@@ -26,6 +27,7 @@
     <input type="hidden" name="eid" value="{{id}}"/>
     <button type="submit">Edit</button>
 </form>
+{{/airplane}}
     </div>
 </body>
 </html>

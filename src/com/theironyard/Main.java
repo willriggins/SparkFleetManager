@@ -12,23 +12,55 @@ import java.util.HashMap;
 
 public class Main {
 
-//    static HashMap<String, User> users = new HashMap<>();
+    public static void createTables(Connection conn) throws SQLException {
+        Statement stmt = conn.createStatement();
+        stmt.execute("CREATE TABLE IF NOT EXISTS fleet (id IDENTITY, model VARCHAR, manufacturer VARCHAR, service_branch VARCHAR, role VARCHAR, unit_cost VARCHAR, user_id INT)");
+        stmt.execute("CREATE TABLE IF NOT EXISTS users (id IDENTITY, username VARCHAR, password VARCHAR)");
+    }
 
-    public static void deleteEntry(Connection conn, int id) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("DELETE FROM fleet WHERE id = ?");
-        stmt.setInt(1, id);
+    public static void insertUser(Connection conn, String name, String password) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO users VALUES (NULL, ?, ?)");
+        stmt.setString(1, name);
+        stmt.setString(2, password);
         stmt.execute();
     }
 
-    public static void updateEntry(Connection conn, String model, String manufacturer, String serviceBranch, String role, String unitCost, int id) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("UPDATE fleet SET model = ?, manufacturer = ?, service_branch = ?, role = ?, unit_cost = ? WHERE id = ?");
+    public static User selectUser(Connection conn, String name) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username = ?");
+        stmt.setString(1, name);
+        ResultSet results = stmt.executeQuery();
+        if (results.next()) {
+            int id = results.getInt("id");
+            String password = results.getString("password");
+            return new User(id, name, password);
+        }
+        return null;
+    }
+
+    public static void insertEntry(Connection conn, String model, String manufacturer, String serviceBranch, String role, String unitCost, int userId) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("INSERT INTO fleet VALUES (NULL, ?, ?, ?, ?, ?, ?)");
         stmt.setString(1, model);
         stmt.setString(2, manufacturer);
         stmt.setString(3, serviceBranch);
         stmt.setString(4, role);
         stmt.setString(5, unitCost);
-        stmt.setInt(6, id);
+        stmt.setInt(6, userId);
         stmt.execute();
+    }
+
+    public static Airplane selectEntry(Connection conn, int id) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM fleet INNER JOIN users ON fleet.user_id = users.id WHERE fleet.id = ?");
+        stmt.setInt(1, id);
+        ResultSet results = stmt.executeQuery();
+        if (results.next()) {
+            String model = results.getString("fleet.model");
+            String manufacturer = results.getString("fleet.manufacturer");
+            String serviceBranch = results.getString("fleet.service_branch");
+            String role = results.getString("fleet.role");
+            String unitCost = results.getString("fleet.unit_cost");
+            return new Airplane(id, model, manufacturer, serviceBranch, role, unitCost);
+        }
+        return null;
     }
 
     public static ArrayList<Airplane> selectEntries(Connection conn, int userId) throws SQLException {
@@ -49,56 +81,23 @@ public class Main {
         return fleet;
     }
 
-    public static Airplane selectEntry(Connection conn, int id) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM fleet INNER JOIN users ON fleet.user_id = users.id WHERE users.id = ?");
-        stmt.setInt(1, id);
-        ResultSet results = stmt.executeQuery();
-        if (results.next()) {
-            String model = results.getString("fleet.model");
-            String manufacturer = results.getString("fleet.manufacturer");
-            String serviceBranch = results.getString("fleet.service_branch");
-            String role = results.getString("fleet.role");
-            String unitCost = results.getString("fleet.unit_cost");
-            return new Airplane(id, model, manufacturer, serviceBranch, role, unitCost);
-        }
-        return null;
-    }
-
-    public static void insertEntry(Connection conn, String model, String manufacturer, String serviceBranch, String role, String unitCost, int userId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO fleet VALUES (NULL, ?, ?, ?, ?, ?, ?)");
+    public static void updateEntry(Connection conn, String model, String manufacturer, String serviceBranch, String role, String unitCost, int id) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("UPDATE fleet SET model = ?, manufacturer = ?, service_branch = ?, role = ?, unit_cost = ? WHERE id = ?");
         stmt.setString(1, model);
         stmt.setString(2, manufacturer);
         stmt.setString(3, serviceBranch);
         stmt.setString(4, role);
         stmt.setString(5, unitCost);
-        stmt.setInt(6, userId);
+        stmt.setInt(6, id);
         stmt.execute();
     }
 
-    public static User selectUser(Connection conn, String name) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username = ?");
-        stmt.setString(1, name);
-        ResultSet results = stmt.executeQuery();
-        if (results.next()) {
-            int id = results.getInt("id");
-            String password = results.getString("password");
-            return new User(id, name, password);
-        }
-        return null;
-    }
-
-    public static void insertUser(Connection conn, String name, String password) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("INSERT INTO users VALUES (NULL, ?, ?)");
-        stmt.setString(1, name);
-        stmt.setString(2, password);
+    public static void deleteEntry(Connection conn, int id) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("DELETE FROM fleet WHERE id = ?");
+        stmt.setInt(1, id);
         stmt.execute();
     }
 
-    public static void createTables(Connection conn) throws SQLException {
-        Statement stmt = conn.createStatement();
-        stmt.execute("CREATE TABLE IF NOT EXISTS fleet (id IDENTITY, model VARCHAR, manufacturer VARCHAR, service_branch VARCHAR, role VARCHAR, unit_cost VARCHAR, user_id INT)");
-        stmt.execute("CREATE TABLE IF NOT EXISTS users (id IDENTITY, username VARCHAR, password VARCHAR)");
-    }
 
     public static void main(String[] args) throws SQLException {
         Server.createWebServer().start();
@@ -211,10 +210,9 @@ public class Main {
                     Session session = request.session();
                     String username = session.attribute("username");
 
-                    User user = selectUser(conn, username);
+                    //User user = selectUser(conn, username);
                     HashMap m = new HashMap();
-                    Airplane airplane = selectEntry(conn, id);
-                    m.put("airplane", airplane);
+                    m.put("airplane", selectEntry(conn, id));
 
                     return new ModelAndView(m, "edit.html");
 
