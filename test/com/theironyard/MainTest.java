@@ -56,7 +56,7 @@ public class MainTest {
         Main.insertEntry(conn, "F-35C", "Lockheed Martin", "US Air Force", "Stealth Multirole Fighter", "116,000,000", alice.id);
         Main.insertEntry(conn, "F-18", "McDonnell Douglas", "US Navy", "Multirole Fighter", "58,000,000", bob.id);
 
-        ArrayList<Airplane> ap = Main.selectEntries(conn);
+        ArrayList<Airplane> ap = Main.selectEntries(conn, alice.id);
         conn.close();
 
     }

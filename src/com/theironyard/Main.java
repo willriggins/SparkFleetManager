@@ -31,8 +31,9 @@ public class Main {
         stmt.execute();
     }
 
-    public static ArrayList<Airplane> selectEntries(Connection conn) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM fleet INNER JOIN users ON fleet.user_id = users.id");
+    public static ArrayList<Airplane> selectEntries(Connection conn, int userId) throws SQLException {
+        PreparedStatement stmt = conn.prepareStatement("SELECT * FROM fleet INNER JOIN users ON fleet.user_id = users.id WHERE users.id = ?");
+        stmt.setInt(1, userId);
         ResultSet results = stmt.executeQuery();
         ArrayList<Airplane> fleet = new ArrayList<>();
         while (results.next()) {
@@ -46,7 +47,6 @@ public class Main {
             fleet.add(ap);
         }
         return fleet;
-
     }
 
     public static Airplane selectEntry(Connection conn, int id) throws SQLException {
@@ -59,7 +59,7 @@ public class Main {
             String serviceBranch = results.getString("fleet.service_branch");
             String role = results.getString("fleet.role");
             String unitCost = results.getString("fleet.unit_cost");
-            return new Airplane(model, manufacturer, serviceBranch, role, unitCost);
+            return new Airplane(id, model, manufacturer, serviceBranch, role, unitCost);
         }
         return null;
     }
@@ -119,8 +119,9 @@ public class Main {
                         return new ModelAndView(m, "home.html");
                     }
                     else {
-                        m.put("fleet", selectEntries(conn));
-                        m.put("username", username);
+                        User user = selectUser(conn, username);
+                        m.put("fleet", selectEntries(conn, user.id));
+                        m.put("username", user.username);
                         return new ModelAndView(m, "fleet.html");
                     }
                 },
@@ -138,7 +139,6 @@ public class Main {
                     }
                     User user = selectUser(conn, username);
                     if (user == null) {
-//                        user = new User(username, password);
                         insertUser(conn, username, password);
                     }
                     else if (!password.equals(user.password)) {
@@ -169,6 +169,9 @@ public class Main {
                     String username = session.attribute("username");
 
                     User user = selectUser(conn, username);
+                    if (user == null) {
+                        throw new Exception("Not logged in");
+                    }
 
                     String model = request.queryParams("model");
                     String manufacturer = request.queryParams("manufacturer");
@@ -209,10 +212,11 @@ public class Main {
                     String username = session.attribute("username");
 
                     User user = selectUser(conn, username);
-
+                    HashMap m = new HashMap();
                     Airplane airplane = selectEntry(conn, id);
+                    m.put("airplane", airplane);
 
-                    return new ModelAndView(airplane, "edit.html");
+                    return new ModelAndView(m, "edit.html");
 
                 },
                 new MustacheTemplateEngine()
@@ -225,7 +229,7 @@ public class Main {
                     String username = session.attribute("username");
 
                     User user = selectUser(conn, username);
-                    selectEntry(conn, user.id);
+                    Airplane ap = selectEntry(conn, id);
 
 
                     String newModel = request.queryParams("newModel");
